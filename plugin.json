@@ -1,5 +1,5 @@
 {
-    "identifier": "com.beproduct.asset-library",
+    "identifier": "com.beproduct.plugin",
     "name": "BeProduct",
     "html": {
         "white_list": [
@@ -7,7 +7,7 @@
         ],
         "html_root": "\\"
     },
-    "version": "1.0.50317",
+    "version": "1.0.0",
     "main": "src",
     "type": "python",
     "api_version": 3
