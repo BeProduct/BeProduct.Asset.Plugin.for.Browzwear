@@ -12,5 +12,6 @@ def __get_content__(url):
 class BeProductBW(BwApi.CallbackBase):
     def Run(self, garmentId, callbackId, dataString):
         BwApi.GarmentClose(garmentId, 1)
-        __get_content__(config.BASE_URL + "api/bw/sync-back")
+        __get_content__(
+            config.BASE_URL + "api/bw/sync-back/" + config.USERID)
         return 0

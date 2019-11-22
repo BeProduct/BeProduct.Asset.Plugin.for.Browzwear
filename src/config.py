@@ -8,14 +8,11 @@ sys.path.append(os.path.join(os.path.dirname(
     os.path.realpath(__file__)), '../venv/lib/python3.7/site-packages'))
 
 DEBUG = False
-BASE_URL = 'http://127.0.0.1:55862/'
 
-BASE_URL = os.environ.get('BW_ASSET_LIB_URL') or BASE_URL
 
 # LIBRARY_INFO_URL = os.path.join(BASE_URL, "library.json")
 # COLLECTIONS_URL = os.path.join(BASE_URL, "collections.json")
 # ASSETS_URL = os.path.join(BASE_URL, "assets.json")
-BASE_ASSETS_PATH = os.path.join(BASE_URL, "assets/")
 
 SSL_CONTEXT = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS)
 SSL_CONTEXT.verify_mode = ssl.CERT_OPTIONAL
@@ -32,3 +29,38 @@ elif sys.platform == 'darwin':
             tempfile.gettempdir(), 'Browzwear/rootcert.pem')
         print("loading root cert")
         SSL_CONTEXT.load_verify_locations(rootcert_path)
+
+import json
+import urllib
+import urllib.request
+
+try:
+    if urllib.request.urlopen("http://127.0.0.1:55862/api/settings/getsettings/").getcode() == 200:
+        SYNC_CLIENT_RUNNING = True
+    else:    
+        SYNC_CLIENT_RUNNING = False
+except Exception as exc:
+    SYNC_CLIENT_RUNNING = False
+    ERROR = exc
+
+
+
+if SYNC_CLIENT_RUNNING:
+    
+    response = urllib.request.urlopen(
+        "http://127.0.0.1:55862/api/settings/getsettings/")
+    client_config = json.loads(response.read().decode('utf-8'))
+
+
+    if not client_config["syncServerAddress"]:
+        BASE_URL = "http://127.0.0.1:55862/"
+        USERID = ""
+
+    else:
+        BASE_URL = client_config["syncServerAddress"].rstrip('/') + '/'
+        if not client_config["currentUserId"]:
+            USERID = ""
+        else:
+            USERID = client_config["currentUserId"].rstrip('/') + '/'
+    
+    BASE_ASSETS_PATH =  BASE_URL.rstrip('/') + '/assets/'

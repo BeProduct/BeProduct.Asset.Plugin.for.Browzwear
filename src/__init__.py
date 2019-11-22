@@ -22,7 +22,7 @@ class Main(bwapi_wrapper.IBwApiEvents):
         # self.asset_library2 = RemoteAssetLibrary('new-')
 
         libs = json.loads(__get_content__(
-            urllib.parse.urljoin(config.BASE_URL, 'api/bw/libraries')))
+            urllib.parse.urljoin(config.BASE_URL, 'api/bw/libraries/'+config.USERID)))
         for lib in libs:
             self.libraries.append(RemoteAssetLibrary(lib))
 
@@ -54,19 +54,17 @@ def debug():
             pass
 
 
-sync_callback = BeProductBW()
-# implement initialization function
-
-
 def BwApiPluginInit() -> int:
     BwApi.IdentifierSet('BeProduct Sync')
-    BwApi.MenuFunctionAdd('Sync Style', sync_callback, 0)
-    BwApi.MenuFunctionReloadAdd()
+    if config.SYNC_CLIENT_RUNNING:
+        BwApi.MenuFunctionAdd('Sync Style', sync_callback, 0)
+        BwApi.MenuFunctionReloadAdd()
 
     return bw.init()
 
-
 debug()
 
-bw = bwapi_wrapper.BwApiWrapper()
-bw.set_delegate(Main())
+if config.SYNC_CLIENT_RUNNING:
+    sync_callback = BeProductBW()
+    bw = bwapi_wrapper.BwApiWrapper()
+    bw.set_delegate(Main())

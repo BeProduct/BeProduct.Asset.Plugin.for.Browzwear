@@ -1,6 +1,7 @@
 import urllib.request
 import urllib.parse
 import urllib
+import ssl
 import config
 
 
@@ -21,12 +22,12 @@ class AssetLibRemoteStorage:
 
     def get_collections(self):
         collection_url = urllib.parse.urljoin(self.base_url, urllib.parse.quote(
-            'api/bw/collections/' + self.library_json['metadata']['tag']))
+            'api/bw/collections/' + config.USERID + self.library_json['metadata']['tag']))
         return __get_content__(collection_url)
 
     def get_assets(self):
         assets_url = urllib.parse.urljoin(self.base_url, urllib.parse.quote(
-            'api/bw/assets/' + self.library_json['metadata']['tag']))
+            'api/bw/assets/' + config.USERID + self.library_json['metadata']['tag']))
         return __get_content__(assets_url)
 
     def get_base_assets_path(self, live=False):
