@@ -17,5 +17,5 @@ class BeProductBW(BwApi.CallbackBase):
         if not config.USERID:
             __get_content__(config.BASE_URL + "api/bw/sync-back/" + config.USERID)
         else:
-            __get_content__(config.BASE_URL + "api/bw/sync-back/" + config.USERID + path_components[-3] + "/" + urllib.parse.quote_plus(path_components[-2]))
+            __get_content__(config.BASE_URL + "api/bw/sync-back/" + config.USERID + path_components[-3] + "/" + urllib.parse.quote(path_components[-2]))
         return 0
