@@ -56,12 +56,15 @@ def debug():
 
 def BwApiPluginInit() -> int:
     BwApi.IdentifierSet('BeProduct Sync')
-    BwApi.MenuFunctionAdd('Sync Style', sync_callback, 0)
-    BwApi.MenuFunctionReloadAdd()
+    if config.SYNC_CLIENT_RUNNING:
+        BwApi.MenuFunctionAdd('Sync Style', sync_callback, 0)
+        BwApi.MenuFunctionReloadAdd()
+
     return bw.init()
 
 debug()
 
-sync_callback = BeProductBW()
-bw = bwapi_wrapper.BwApiWrapper()
-bw.set_delegate(Main())
+if config.SYNC_CLIENT_RUNNING:
+    sync_callback = BeProductBW()
+    bw = bwapi_wrapper.BwApiWrapper()
+    bw.set_delegate(Main())

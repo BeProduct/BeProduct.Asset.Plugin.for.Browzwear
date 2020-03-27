@@ -14,8 +14,11 @@ class BeProductBW(BwApi.CallbackBase):
     def Run(self, garmentId, callbackId, dataString):
         path_components = os.path.normpath(BwApi.GarmentPathGet(garmentId)).split(os.sep)
         BwApi.GarmentClose(garmentId, 1)
-        ind = 0
-        if path_components[-1].lower().endswith('.bw'):
-            ind=1
-        __get_content__(config.BASE_URL + "api/bw/sync-back/" + config.USERID + path_components[-3+ind] + "/" + urllib.parse.quote(path_components[-2+ind]))
+        if not config.USERID:
+            __get_content__(config.BASE_URL + "api/bw/sync-back/" + config.USERID)
+        else:
+            ind = 0
+            if path_components[-1].lower().endswith('.bw'):
+                ind=1
+            __get_content__(config.BASE_URL + "api/bw/sync-back/" + config.USERID + path_components[-3+ind] + "/" + urllib.parse.quote(path_components[-2+ind]))
         return 0
