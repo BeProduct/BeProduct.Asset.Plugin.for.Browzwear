@@ -34,6 +34,7 @@ import json
 import urllib
 import urllib.request
 
+# sync server client
 try:
     if urllib.request.urlopen("http://127.0.0.1:55862/api/settings/getsettings/").getcode() == 200:
         SYNC_CLIENT_RUNNING = True
@@ -42,8 +43,6 @@ try:
 except Exception as exc:
     SYNC_CLIENT_RUNNING = False
     ERROR = exc
-
-
 
 if SYNC_CLIENT_RUNNING:
     
@@ -64,3 +63,20 @@ if SYNC_CLIENT_RUNNING:
             USERID = client_config["currentUserId"].rstrip('/') + '/'
     
     BASE_ASSETS_PATH =  BASE_URL.rstrip('/') + '/assets/'
+
+
+
+# standalone client
+if not  SYNC_CLIENT_RUNNING:
+    try:
+        if urllib.request.urlopen("https://local.beproduct.org:55862/api/settings/getsettings/").getcode() == 200:
+            SYNC_CLIENT_RUNNING = True
+            BASE_URL = "https://local.beproduct.org:55862/"
+            USERID = ""
+            BASE_ASSETS_PATH =  BASE_URL.rstrip('/') + '/assets/'
+
+        else:    
+            SYNC_CLIENT_RUNNING = False
+    except Exception as exc:
+        SYNC_CLIENT_RUNNING = False
+        ERROR = exc
