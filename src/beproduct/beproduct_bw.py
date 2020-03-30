@@ -14,7 +14,7 @@ class BeProductBW(BwApi.CallbackBase):
     def Run(self, garmentId, callbackId, dataString):
         path_components = os.path.normpath(BwApi.GarmentPathGet(garmentId)).split(os.sep)
         BwApi.GarmentClose(garmentId, 1)
-        if not config.USERID:
+        if not config.USERID and not config.SYNC_STANDALONE:
             __get_content__(config.BASE_URL + "api/bw/sync-back/" + config.USERID)
         else:
             ind = 0

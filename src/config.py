@@ -65,7 +65,7 @@ if SYNC_CLIENT_RUNNING:
     BASE_ASSETS_PATH =  BASE_URL.rstrip('/') + '/assets/'
 
 
-
+SYNC_STANDALONE = False
 # standalone client
 if not  SYNC_CLIENT_RUNNING:
     try:
@@ -74,6 +74,7 @@ if not  SYNC_CLIENT_RUNNING:
             BASE_URL = "https://local.beproduct.org:55862/"
             USERID = ""
             BASE_ASSETS_PATH =  BASE_URL.rstrip('/') + '/assets/'
+            SYNC_STANDALONE = True
 
         else:    
             SYNC_CLIENT_RUNNING = False
