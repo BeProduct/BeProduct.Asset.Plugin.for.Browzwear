@@ -41,6 +41,18 @@ class Asset:
     def get_id(self) -> int:
         return self.asset_id
 
+    def get_metadata(self) -> Optional[str]:
+        data_str = BwApi.AssetLibAssetGet(self.library_id, self.asset_id)
+
+        if len(data_str) == 0:
+            return None
+
+        data = json.loads(data_str)
+        if "metadata" not in data:
+            return {}
+
+        return data["metadata"]
+
     def get_remote_id(self) -> Optional[str]:
         data_str = BwApi.AssetLibAssetGet(self.library_id, self.asset_id)
 

@@ -169,7 +169,7 @@ class RemoteAssetLibrary(IAssetLibraryEvents, IBwApiWndEvents):
                 # update the thumb field to contain the full thumb url
                 if "thumb" in asset:
                     thumb_url = urllib.parse.urljoin(
-                        self.asset_lib_remote_storage.get_base_assets_path(live=asset["thumb"].startswith("__LIVE__")), asset["thumb"])
+                        self.asset_lib_remote_storage.get_base_assets_path(live=asset["thumb"].startswith("__")), asset["thumb"])
                     asset["thumb"] = thumb_url
 
                 if "placeholder_image" in asset:

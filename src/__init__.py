@@ -7,6 +7,7 @@ import BwApi
 
 from .remote_asset_library import RemoteAssetLibrary
 from .beproduct.beproduct_bw import BeProductBW
+from .beproduct_dev_app import BeProduct3DDevelopmentAssets
 
 
 def __get_content__(url):
@@ -18,8 +19,6 @@ class Main(bwapi_wrapper.IBwApiEvents):
     def __init__(self):
         super().__init__()
         self.libraries = []
-        # self.asset_library = RemoteAssetLibrary()
-        # self.asset_library2 = RemoteAssetLibrary('new-')
 
         libs = json.loads(__get_content__(
             urllib.parse.urljoin(config.BASE_URL, 'api/bw/libraries/'+config.USERID)))
@@ -29,9 +28,6 @@ class Main(bwapi_wrapper.IBwApiEvents):
     def on_post_initialize(self):
         for lib in self.libraries:
             lib.initialize()
-        # self.asset_library.initialize()
-        # self.asset_library2.initialize()
-
 
 def debug():
     if config.DEBUG:
@@ -59,12 +55,15 @@ def BwApiPluginInit() -> int:
     if config.SYNC_CLIENT_RUNNING:
         BwApi.MenuFunctionAdd('Sync Style', sync_callback, 0)
         BwApi.MenuFunctionReloadAdd()
-
+        # register to file -> open event
+        BwApi.EventRegister(fileopenthandler, 1, BwApi.BW_API_EVENT_GARMENT_OPEN)
     return bw.init()
 
+# invoke debug if enabled
 debug()
 
 if config.SYNC_CLIENT_RUNNING:
     sync_callback = BeProductBW()
+    fileopenthandler = BeProduct3DDevelopmentAssets()
     bw = bwapi_wrapper.BwApiWrapper()
     bw.set_delegate(Main())

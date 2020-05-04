@@ -7,12 +7,8 @@ sys.path.append(os.path.join(os.path.dirname(
 sys.path.append(os.path.join(os.path.dirname(
     os.path.realpath(__file__)), '../venv/lib/python3.7/site-packages'))
 
-DEBUG = False
+DEBUG = True
 
-
-# LIBRARY_INFO_URL = os.path.join(BASE_URL, "library.json")
-# COLLECTIONS_URL = os.path.join(BASE_URL, "collections.json")
-# ASSETS_URL = os.path.join(BASE_URL, "assets.json")
 
 SSL_CONTEXT = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS)
 SSL_CONTEXT.verify_mode = ssl.CERT_OPTIONAL
