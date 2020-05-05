@@ -15,16 +15,8 @@ SSL_CONTEXT.verify_mode = ssl.CERT_OPTIONAL
 if sys.platform == 'win32':
     SSL_CONTEXT.load_default_certs()
 elif sys.platform == 'darwin':
-    import tempfile
+    SSL_CONTEXT = ssl._create_unverified_context()
 
-    rootcert_path = os.path.join(tempfile.gettempdir(), 'Bw/rootcert.pem')
-    if os.path.isfile(rootcert_path):
-        SSL_CONTEXT.load_verify_locations(rootcert_path)
-    else:
-        rootcert_path = os.path.join(
-            tempfile.gettempdir(), 'Browzwear/rootcert.pem')
-        print("loading root cert")
-        SSL_CONTEXT.load_verify_locations(rootcert_path)
 
 import json
 import urllib
@@ -34,18 +26,17 @@ import urllib.request
 try:
     if urllib.request.urlopen("http://127.0.0.1:55862/api/settings/getsettings/").getcode() == 200:
         SYNC_CLIENT_RUNNING = True
-    else:    
+    else:
         SYNC_CLIENT_RUNNING = False
 except Exception as exc:
     SYNC_CLIENT_RUNNING = False
     ERROR = exc
 
 if SYNC_CLIENT_RUNNING:
-    
+
     response = urllib.request.urlopen(
         "http://127.0.0.1:55862/api/settings/getsettings/")
     client_config = json.loads(response.read().decode('utf-8'))
-
 
     if not client_config["syncServerAddress"]:
         BASE_URL = "http://127.0.0.1:55862/"
@@ -57,22 +48,22 @@ if SYNC_CLIENT_RUNNING:
             USERID = ""
         else:
             USERID = client_config["currentUserId"].rstrip('/') + '/'
-    
-    BASE_ASSETS_PATH =  BASE_URL.rstrip('/') + '/assets/'
+
+    BASE_ASSETS_PATH = BASE_URL.rstrip('/') + '/assets/'
 
 
 SYNC_STANDALONE = False
 # standalone client
-if not  SYNC_CLIENT_RUNNING:
+if not SYNC_CLIENT_RUNNING:
     try:
-        if urllib.request.urlopen("https://local.beproduct.org:55862/api/settings/getsettings/").getcode() == 200:
+        if urllib.request.urlopen("https://local.beproduct.org:55862/api/settings/getsettings/", context=SSL_CONTEXT).getcode() == 200:
             SYNC_CLIENT_RUNNING = True
             BASE_URL = "https://local.beproduct.org:55862/"
             USERID = ""
-            BASE_ASSETS_PATH =  BASE_URL.rstrip('/') + '/assets/'
+            BASE_ASSETS_PATH = BASE_URL.rstrip('/') + '/assets/'
             SYNC_STANDALONE = True
 
-        else:    
+        else:
             SYNC_CLIENT_RUNNING = False
     except Exception as exc:
         SYNC_CLIENT_RUNNING = False
