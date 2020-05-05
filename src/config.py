@@ -7,7 +7,7 @@ sys.path.append(os.path.join(os.path.dirname(
 sys.path.append(os.path.join(os.path.dirname(
     os.path.realpath(__file__)), '../venv/lib/python3.7/site-packages'))
 
-DEBUG = True
+DEBUG = False
 
 
 SSL_CONTEXT = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS)
