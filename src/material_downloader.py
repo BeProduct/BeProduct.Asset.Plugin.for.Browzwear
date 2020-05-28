@@ -50,9 +50,10 @@ class MaterialDownloader:
 
             tmp_dir = tempfile.mkdtemp()
 
-            base_assets_path = self.asset_lib_remote_storage.get_base_assets_path(live=remote_id.startswith("__"))
+            res_id = resource['metadata']['asset_path'] if 'asset_path' in resource['metadata'] else remote_id
+            base_assets_path = self.asset_lib_remote_storage.get_base_assets_path(live=res_id.startswith("__"))
 
-            resource_path = urllib.parse.urljoin(base_assets_path, resource['metadata']['asset_path'] if 'asset_path' in resource['metadata'] else remote_id)
+            resource_path = urllib.parse.urljoin(base_assets_path,res_id)
             resource_json_path = urllib.parse.urljoin(resource_path, 'resource.json')
 
 

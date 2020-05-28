@@ -28,7 +28,7 @@ class BeProductBW(BwApi.CallbackBase):
             if not config.USERID and not config.SYNC_STANDALONE:
                 __get_content__(config.BASE_URL + "api/bw/sync-back/" + config.USERID)
             else:
-                __get_content__(config.BASE_URL + "api/bw/sync-back/" + config.USERID + path_components[-3+ind] + "/" + urllib.parse.quote(path_components[-2+ind]))
+                __get_content__(config.BASE_URL + "api/bw/sync-back?f=" + filename)
         
         # Refresh colors  
         if callbackId == 1:

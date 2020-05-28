@@ -183,8 +183,7 @@ class RemoteAssetLibrary(IAssetLibraryEvents, IBwApiWndEvents):
                         continue
 
                     assets.append(asset_obj)
-                    remote_id_to_local_id[asset_obj.get_remote_id(
-                    )] = asset_obj.get_id()
+                    remote_id_to_local_id[remote_asset_id] = asset_obj.get_id()
 
                 collection.add_asset_to_collection(
                     remote_id_to_local_id[remote_asset_id])
