@@ -24,11 +24,11 @@ class BeProductBW(BwApi.CallbackBase):
           
         # Sync style
         if callbackId == 0:
-            BwApi.GarmentClose(garmentId, 1)
+            BwApi.GarmentClose(garmentId, 0)
             if not config.USERID and not config.SYNC_STANDALONE:
                 __get_content__(config.BASE_URL + "api/bw/sync-back/" + config.USERID)
             else:
-                __get_content__(config.BASE_URL + "api/bw/sync-back?f=" + filename)
+                __get_content__(config.BASE_URL + "api/sync/sync?f=" + filename)
         
         # Refresh colors  
         if callbackId == 1:
