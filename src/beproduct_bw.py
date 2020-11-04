@@ -37,4 +37,7 @@ class BeProductBW(BwApi.CallbackBase):
                 colors_json = __get_content__(config.BASE_URL + "api/bw/colors?f=" + filename)
                 BeProduct3DDevelopmentAssets.colors = BwApi.ColorLibraryCreate(garmentId, colors_json)
 
+        if callbackId == 2:
+            BwApi.GarmentClose(garmentId, 0)
+            __get_content__(config.BASE_URL + "api/sync/offload/turntable?f=" + filename)
         return 0

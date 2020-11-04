@@ -55,6 +55,7 @@ def BwApiPluginInit() -> int:
     if config.SYNC_CLIENT_RUNNING:
         BwApi.MenuFunctionAdd('Refresh colors', sync_callback, 1)
         BwApi.MenuFunctionAdd('Sync to BeProduct', sync_callback, 0)
+        BwApi.MenuFunctionAdd('Render Turntable with BeProduct', sync_callback, 2)
         BwApi.MenuFunctionReloadAdd()
         # register to file -> open event
         BwApi.EventRegister(fileopenthandler, 1, BwApi.BW_API_EVENT_GARMENT_OPEN)
