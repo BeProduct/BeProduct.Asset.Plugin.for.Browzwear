@@ -40,4 +40,8 @@ class BeProductBW(BwApi.CallbackBase):
         if callbackId == 2:
             BwApi.GarmentClose(garmentId, 0)
             __get_content__(config.BASE_URL + "api/sync/offload/turntable?f=" + filename)
+
+        if callbackId == 3:
+            BwApi.GarmentClose(garmentId, 0)
+            __get_content__(config.BASE_URL + "api/sync/offload/techpack?f=" + filename)
         return 0
