@@ -65,10 +65,13 @@ class BeProductBW(BwApi.CallbackBase):
         
         # Refresh colors  
         if callbackId == 1:
-            if BeProduct3DDevelopmentAssets.colors is not None:
-                BwApi.ColorLibraryRemove(garmentId, BeProduct3DDevelopmentAssets.colors)
-                colors_json = __get_content__(config.BASE_URL + "api/bw/colors?f=" + filename)
-                BeProduct3DDevelopmentAssets.colors = BwApi.ColorLibraryCreate(garmentId, colors_json)
+            if BeProduct3DDevelopmentAssets.colors:
+                while BeProduct3DDevelopmentAssets.colors:
+                    BwApi.ColorLibraryRemove(garmentId, BeProduct3DDevelopmentAssets.colors.pop(0))
+
+                colors_json = __get_content__(config.BASE_URL + "api/bw/colors?nocache=true&api-version=2.0&f=" + filename)
+                for col in json.loads(colors_json):
+                    BeProduct3DDevelopmentAssets.colors = BwApi.ColorLibraryCreate(garmentId, json.dumps(col)) 
 
         if callbackId == 2:
             BwApi.GarmentClose(garmentId, 0)

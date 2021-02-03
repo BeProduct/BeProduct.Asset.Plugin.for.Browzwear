@@ -13,7 +13,7 @@ def __get_content__(url):
     
 class BeProduct3DDevelopmentAssets(BwApi.CallbackBase):
     library = None 
-    colors = None
+    colors = []
     def Run(self, garmentId, callbackId, dataString):
         ind = 0
         path_components = os.path.normpath(BwApi.GarmentPathGet(garmentId)).split(os.sep)
@@ -36,8 +36,14 @@ class BeProduct3DDevelopmentAssets(BwApi.CallbackBase):
 
 
             # colors for 3d development app 
-            colors_json = __get_content__(config.BASE_URL + "api/bw/colors?f=" + filename)
-            BeProduct3DDevelopmentAssets.colors = BwApi.ColorLibraryCreate(garmentId, colors_json)
+
+            while BeProduct3DDevelopmentAssets.colors:
+                BwApi.ColorLibraryRemove(garmentId, BeProduct3DDevelopmentAssets.colors.pop(0))
+
+            colors_json = __get_content__(config.BASE_URL + "api/bw/colors?api-version=2.0&f=" + filename)
+
+            for col in json.loads(colors_json):
+                BeProduct3DDevelopmentAssets.colors.append(BwApi.ColorLibraryCreate(garmentId, json.dumps(col)))
 
           
 
