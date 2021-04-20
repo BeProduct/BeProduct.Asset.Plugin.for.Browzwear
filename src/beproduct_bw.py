@@ -7,6 +7,7 @@ from urllib.parse import urlencode
 import config
 import os
 import json
+from datetime import datetime as dt
 from .beproduct_dev_app import BeProduct3DDevelopmentAssets
 
 def __get_content__(url):
@@ -27,11 +28,14 @@ def get_file_info():
         info = {}
 
         # Snapshots
-        snapshots = []
         snapshot_ids = BwApi.GarmentSnapshotIds(garment_id)
+        sorted_snapshots = []
         for snapshot_id in snapshot_ids:
-            snapshots.append({ "id":snapshot_id, "data":json.loads(BwApi.SnapshotInfoGet(garment_id, snapshot_id))})
-        info["snapshots"] = snapshots
+            sn = json.loads(BwApi.SnapshotInfoGet(garment_id, snapshot_id))
+            sorted_snapshots.append({"id":snapshot_id,"data":sn})
+        if(len(sorted_snapshots)):
+            sorted_snapshots.sort(key=lambda x: x["data"]["created_date"], reverse=True)
+        info["snapshots"] = sorted_snapshots
 
         # Colorways
         colorways = []
@@ -39,6 +43,7 @@ def get_file_info():
         for colorway_id in colorway_ids:
             colorways.append ({"id": colorway_id, "name": BwApi.ColorwayNameGet(garment_id, colorway_id)}) 
         info["colorways"] = colorways
+        #info["vstitcherVersion"] = json.loads(BwApi.HostApplicationGet())["version"]
         return info
     except:
         return None
