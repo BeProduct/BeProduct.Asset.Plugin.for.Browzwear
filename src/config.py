@@ -9,7 +9,6 @@ sys.path.append(os.path.join(os.path.dirname(
 
 DEBUG = False
 
-
 SSL_CONTEXT = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS)
 SSL_CONTEXT.verify_mode = ssl.CERT_OPTIONAL
 if sys.platform == 'win32':

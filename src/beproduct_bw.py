@@ -28,10 +28,17 @@ def get_file_info():
         info = {}
 
         # Snapshots
-        snapshot_ids = BwApi.GarmentSnapshotIds(garment_id)
+        if hasattr(BwApi,'GarmentSnapshotIdsEx'):
+            snapshot_ids = BwApi.GarmentSnapshotIdsEx(garment_id)
+        else:
+            snapshot_ids = BwApi.GarmentSnapshotIds(garment_id)
+
         sorted_snapshots = []
         for snapshot_id in snapshot_ids:
             sn = json.loads(BwApi.SnapshotInfoGet(garment_id, snapshot_id))
+            if 'name' not in sn:
+                sn['name'] = snapshot_id
+
             sorted_snapshots.append({"id":snapshot_id,"data":sn})
         if(len(sorted_snapshots)):
             sorted_snapshots.sort(key=lambda x: x["data"]["created_date"], reverse=True)
