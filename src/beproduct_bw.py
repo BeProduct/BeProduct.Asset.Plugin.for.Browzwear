@@ -90,6 +90,23 @@ class BeProductBW(BwApi.CallbackBase):
             __get_content__(config.BASE_URL + "api/sync/offload/turntable?f=" + filename)
 
         if callbackId == 3:
+
+            if hasattr(BwApi,'GarmentSnapshotIdsEx'):
+                snapshot_ids = BwApi.GarmentSnapshotIdsEx(garmentId)
+            else:
+                snapshot_ids = BwApi.GarmentSnapshotIds(garmentId)
+            sorted_snapshots = []
+            for snapshot_id in snapshot_ids:
+                sn = json.loads(BwApi.SnapshotInfoGet(garmentId, snapshot_id))
+                if 'name' not in sn:
+                    sn['name'] = snapshot_id
+                sorted_snapshots.append({"id":snapshot_id,"data":sn})
+
+            for sn in sorted_snapshots:
+                if sn["data"]["name"] == 'BeProduct Sync':
+                    BwApi.SnapshotDelete(garmentId, sn['id'])
+            BwApi.SnapshotSave(garmentId, 'BeProduct Sync')
+
             info = get_file_info()
             if info is not None:
                 BwApi.GarmentClose(garmentId, 0)
