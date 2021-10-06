@@ -1,4 +1,6 @@
 import BwApi
+from wrappers.wnd import Wnd, IBwApiWndEvents
+
 import urllib.request
 import urllib.parse
 import urllib
@@ -55,8 +57,28 @@ def get_file_info():
     except:
         return None
 
+class BeProductWnd(IBwApiWndEvents):
+    def __init__(self, key):
+        url = config.BASE_URL.rstrip('/')+"/index.html"
+        self.wnd = Wnd(url + f"#/wizard/turntable/{key}", "Render", 655, 530, {})
+        self.wnd.set_delegate(self)
+        self.wnd.show()
 
+    def on_msg(self, garment_id: str, callback_id: int, data: str) -> None:
+        params = json.loads(data)
+        if params['exit'] == True:
+            self.wnd.close()
+    def on_load(self, garment_id: str, callback_id: int, data: str) -> None:
+        pass
+
+    def on_close(self, garment_id: str, callback_id: int, data: str) -> None:
+        pass 
+       
+    def on_uncaught_exception(self, garment_id: str, callback_id: int, data: str) -> None:
+        print('$$$$$$$$$$$$$$$$ on_uncaught_exception $$$$$$$$$$$$$$$$')
+            
 class BeProductBW(BwApi.CallbackBase):
+
     def Run(self, garmentId, callbackId, dataString):
 
         path_components = os.path.normpath(BwApi.GarmentPathGet(garmentId)).split(os.sep)
@@ -89,11 +111,14 @@ class BeProductBW(BwApi.CallbackBase):
             BwApi.GarmentClose(garmentId, 0)
             __get_content__(config.BASE_URL + "api/sync/offload/turntable?f=" + filename)
 
+        if callbackId == 4:
+           pass
+        
         if callbackId == 3:
             info = get_file_info()
             if info is not None:
                 BwApi.GarmentClose(garmentId, 0)
-                info["title"] = "Generate Turntable"
-                __post_content__(config.BASE_URL + "api/sync/wizard/turntable?f=" + filename, info)
-
+                key = json.loads(__post_content__(config.BASE_URL + "api/sync/wizard/turntable?f=" + filename, info))["key"]
+                self.wnd = BeProductWnd(key)
+              
         return 0
