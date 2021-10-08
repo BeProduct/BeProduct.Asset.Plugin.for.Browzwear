@@ -60,7 +60,7 @@ def get_file_info():
 class BeProductWnd(IBwApiWndEvents):
     def __init__(self, key):
         url = config.BASE_URL.rstrip('/')+"/index.html"
-        self.wnd = Wnd(url + f"#/wizard/turntable/{key}", "Render", 655, 530, {})
+        self.wnd = Wnd(url + f"#/wizard/turntable/{key}", "Render", 645, 450, {})
         self.wnd.set_delegate(self)
         self.wnd.show()
 
