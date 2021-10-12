@@ -67,3 +67,5 @@ if not SYNC_CLIENT_RUNNING:
     except Exception as exc:
         SYNC_CLIENT_RUNNING = False
         ERROR = exc
+
+MAPPING={}
