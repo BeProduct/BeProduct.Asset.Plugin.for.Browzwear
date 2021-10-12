@@ -114,7 +114,7 @@ def update_embedded_json():
             bp_obj["styleColors"].append(colorway)
 
         colorway["colorName"] = color_name
-        bw_mat_ids = BwApi.ColorwayMaterialIds(garment_id, colorway_id)
+        bw_mat_ids = BwApi.ColorwayUsedMaterialIds(garment_id, colorway_id)
         mat_ids_to_remove = list(
             set([e["bwMaterialId"] for e in colorway["materials"]]) - set(bw_mat_ids))
         colorway["materials"] = [e for e in colorway["materials"] if e["bwMaterialId"] not in mat_ids_to_remove]
