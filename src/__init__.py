@@ -6,7 +6,7 @@ import json
 import BwApi
 
 from .remote_asset_library import RemoteAssetLibrary
-from .beproduct_bw import BeProductBW
+from .beproduct_bw import BeProductBW, UpdateJsonOnModified
 from .beproduct_dev_app import BeProduct3DDevelopmentAssets
 
 
@@ -58,6 +58,7 @@ def BwApiPluginInit() -> int:
         BwApi.MenuFunctionReloadAdd()
         # register to file -> open event
         BwApi.EventRegister(fileopenthandler, 1, BwApi.BW_API_EVENT_GARMENT_OPEN)
+        BwApi.EventRegister(filemodifiedhandler, 1, BwApi.BW_API_EVENT_GARMENT_MODIFIED)
     return bw.init()
 
 # invoke debug if enabled
@@ -66,5 +67,6 @@ debug()
 if config.SYNC_CLIENT_RUNNING:
     sync_callback = BeProductBW()
     fileopenthandler = BeProduct3DDevelopmentAssets()
+    filemodifiedhandler = UpdateJsonOnModified()
     bw = bwapi_wrapper.BwApiWrapper()
     bw.set_delegate(Main())

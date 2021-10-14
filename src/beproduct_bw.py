@@ -143,6 +143,14 @@ def update_embedded_json():
 
     return bp_obj
 
+class UpdateJsonOnModified(BwApi.CallbackBase):
+    def Run(self, garmentId, callbackId, dataString):
+        try:
+            update_embedded_json()
+        except:
+            pass
+        
+
 class BeProductWnd(IBwApiWndEvents):
     def __init__(self, key):
         url = config.BASE_URL.rstrip('/')+"/index.html"
