@@ -104,6 +104,8 @@ class MaterialDownloader:
                 mat['custom'] = mat.get('custom',{})
                 mat['custom']['BeProduct'] = mat['custom'].get('BeProduct',{})
                 mat['custom']['BeProduct']["info"] = downloaded_material['metadata']
+                mat['custom']['BeProduct']["materialId"] = None
+                mat['custom']['BeProduct']["materialColorId"] = None
 
             is_group = BwApi.MaterialGroup(garment_id, colorway_id, material_id)
 

@@ -66,6 +66,9 @@ def get_file_info():
         return None
 
 def get_bp_material_ids(colorway_id, material_id):
+    if material_id in config.MATERIAL_MAPPING:
+        return config.MATERIAL_MAPPING[material_id]
+
     def to_guid(bp_string):
         guid = bp_string.replace('_','/').replace('-','+')                                                                        
         end = len(guid)%4
@@ -80,11 +83,19 @@ def get_bp_material_ids(colorway_id, material_id):
     is_group = BwApi.MaterialGroup(garment_id, colorway_id, material_id)
     if not is_group:
         try:
-            mat = json.loads(BwApi.MaterialGet(garment_id, colorway_id, material_id))
+            mat = json.loads(BwApi.MaterialGet(garment_id, colorway_id, material_id))         
+            keys = mat['custom']['BeProduct'].keys()
+
+            # case popup
+            if 'materialId' in keys and keys['materialId'] and 'materialColorId' in keys and keys['materialColorId']:
+                return (keys['materialId'], keys['materialColorId'])
+
+            # case library
             plugin_ids = mat['custom']['BeProduct']['info']['asset_path'].rstrip('/').split('$')
             bp_cw_id = to_guid(plugin_ids[-1])
             bp_mat_id = to_guid(plugin_ids[-2])
             return (bp_mat_id, bp_cw_id)
+
         except Exception as e:
             return None
 
@@ -185,11 +196,12 @@ class BeProductBW(BwApi.CallbackBase):
           
         # Sync style
         if callbackId == 0:
+            info = get_file_info()
             BwApi.GarmentClose(garmentId, 0)
             if not config.USERID and not config.SYNC_STANDALONE:
                 __get_content__(config.BASE_URL + "api/bw/sync-back/" + config.USERID)
             else:
-                __get_content__(config.BASE_URL + "api/sync/sync?f=" + filename)
+                __post_content__(config.BASE_URL + "api/sync/sync?f=" + filename, info)
         
         # Refresh colors  
         if callbackId == 1:

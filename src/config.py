@@ -68,4 +68,4 @@ if not SYNC_CLIENT_RUNNING:
         SYNC_CLIENT_RUNNING = False
         ERROR = exc
 
-MAPPING={}
+MATERIAL_MAPPING={}

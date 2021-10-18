@@ -8,6 +8,7 @@ import BwApi
 from .remote_asset_library import RemoteAssetLibrary
 from .beproduct_bw import BeProductBW, UpdateJsonOnModified
 from .beproduct_dev_app import BeProduct3DDevelopmentAssets
+from .beproduct_wnd import BeProductWnd
 
 
 def __get_content__(url):
@@ -48,10 +49,35 @@ def debug():
         except:
             pass
 
+class WndCallback(BwApi.CallbackBase):
+    def Run(self, garment_id, callback_id, data):
+              
+        url = 'https://dev-plugin.azurewebsites.net/'
+        #url = '/index.html'
+        title = 'BeProduct Assets'
+
+        if callback_id == 0:
+            urlSuffix = ''
+            title = 'BeProduct Materials'
+
+        if callback_id == 1:
+            urlSuffix = '?target=colors'
+            title = 'BeProduct Colors'
+            
+        wnd.show_window({
+            'url': url + urlSuffix,
+            'title': title,
+            'width': 1280,
+            'height': 800,
+            'style': {}
+            })
+
 
 def BwApiPluginInit() -> int:
     BwApi.IdentifierSet('BeProduct Sync')
     if config.SYNC_CLIENT_RUNNING:
+        BwApi.MenuFunctionAdd('Material Library', wnd_callback, 0)
+        BwApi.MenuFunctionAdd('Color Library', wnd_callback, 1)
         BwApi.MenuFunctionAdd('Sync Color Libraries', sync_callback, 1)
         BwApi.MenuFunctionAdd('Sync From Local Folder', sync_callback, 0)
         BwApi.MenuFunctionAdd('Sync To BeProduct Cloud', sync_callback, 3)
@@ -69,4 +95,6 @@ if config.SYNC_CLIENT_RUNNING:
     fileopenthandler = BeProduct3DDevelopmentAssets()
     filemodifiedhandler = UpdateJsonOnModified()
     bw = bwapi_wrapper.BwApiWrapper()
+    wnd = BeProductWnd()
+    wnd_callback = WndCallback()
     bw.set_delegate(Main())
