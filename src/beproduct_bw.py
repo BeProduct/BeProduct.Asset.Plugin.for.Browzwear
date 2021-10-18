@@ -87,7 +87,7 @@ def get_bp_material_ids(colorway_id, material_id):
             keys = mat['custom']['BeProduct'].keys()
 
             # case popup
-            if 'materialId' in keys and keys['materialId'] and 'materialColorId' in keys and keys['materialColorId']:
+            if 'materialId' in keys and mat['custom']['BeProduct']['materialId'] and 'materialColorId' in keys and mat['custom']['BeProduct']['materialColorId']:
                 return (keys['materialId'], keys['materialColorId'])
 
             # case library
