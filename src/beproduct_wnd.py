@@ -5,7 +5,7 @@ import os.path
 import tempfile
 
 from urllib.request import urlopen
-from urllib.parse import urlparse, quote
+from urllib.parse import urlparse,urlunparse,quote
 import json
 import ssl
 import config
@@ -15,8 +15,11 @@ context = ssl._create_unverified_context()
 tmp_dir = None
 
 def download_remote_resource(dest_path: str, source_url: str) -> None:
+    def url_fix(url):
+        parts = urlparse(url)
+        return urlunparse(parts._replace(path=quote(parts.path))) 
 
-    response = urlopen(source_url, context=context)
+    response = urlopen(url_fix(source_url), context=context)
     text = response.read()
 
     if not os.path.exists(os.path.dirname(dest_path)):

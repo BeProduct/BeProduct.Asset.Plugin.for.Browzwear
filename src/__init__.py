@@ -59,18 +59,25 @@ class WndCallback(BwApi.CallbackBase):
         if callback_id == 0:
             urlSuffix = ''
             title = 'BeProduct Materials'
+            mat_wnd.show_window({
+                'url': url + urlSuffix,
+                'title': title,
+                'width': 1280,
+                'height': 800,
+                'style': {}
+                })
 
         if callback_id == 1:
             urlSuffix = '?target=colors'
             title = 'BeProduct Colors'
             
-        wnd.show_window({
-            'url': url + urlSuffix,
-            'title': title,
-            'width': 1280,
-            'height': 800,
-            'style': {}
-            })
+            col_wnd.show_window({
+                'url': url + urlSuffix,
+                'title': title,
+                'width': 1280,
+                'height': 800,
+                'style': {}
+                })
 
 
 def BwApiPluginInit() -> int:
@@ -78,9 +85,9 @@ def BwApiPluginInit() -> int:
     if config.SYNC_CLIENT_RUNNING:
         BwApi.MenuFunctionAdd('Material Library', wnd_callback, 0)
         BwApi.MenuFunctionAdd('Color Library', wnd_callback, 1)
-        BwApi.MenuFunctionAdd('Sync Color Libraries', sync_callback, 1)
+        # BwApi.MenuFunctionAdd('Sync Color Libraries', sync_callback, 1)
         BwApi.MenuFunctionAdd('Sync From Local Folder', sync_callback, 0)
-        BwApi.MenuFunctionAdd('Sync To BeProduct Cloud', sync_callback, 3)
+        BwApi.MenuFunctionAdd('Sync To Cloud', sync_callback, 3)
         BwApi.MenuFunctionReloadAdd()
         # register to file -> open event
         BwApi.EventRegister(fileopenthandler, 1, BwApi.BW_API_EVENT_GARMENT_OPEN)
@@ -95,6 +102,7 @@ if config.SYNC_CLIENT_RUNNING:
     fileopenthandler = BeProduct3DDevelopmentAssets()
     filemodifiedhandler = UpdateJsonOnModified()
     bw = bwapi_wrapper.BwApiWrapper()
-    wnd = BeProductWnd()
+    col_wnd = BeProductWnd()
+    mat_wnd = BeProductWnd()
     wnd_callback = WndCallback()
     bw.set_delegate(Main())
