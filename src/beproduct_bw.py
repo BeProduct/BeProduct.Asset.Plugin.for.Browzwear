@@ -65,6 +65,18 @@ def get_file_info():
     except:
         return None
 
+def dump_info(obj):
+    fname = BwApi.GarmentPathGet(BwApi.GarmentId()) 
+    filename = os.path.basename(fname)
+    dir = os.path.dirname(fname)
+    jsonpath = os.path.join(dir,'.config',filename+'.json')
+    try:
+        with open(jsonpath,'w') as f:
+            json.dump(obj, f)
+    except:
+        pass
+
+
 def get_bp_material_ids(colorway_id, material_id):
     if material_id in config.MATERIAL_MAPPING:
         return config.MATERIAL_MAPPING[material_id]
@@ -197,6 +209,7 @@ class BeProductBW(BwApi.CallbackBase):
         # Sync style
         if callbackId == 0:
             info = get_file_info()
+            dump_info(info)
             BwApi.GarmentClose(garmentId, 0)
             if not config.USERID and not config.SYNC_STANDALONE:
                 __get_content__(config.BASE_URL + "api/bw/sync-back/" + config.USERID)
@@ -222,6 +235,7 @@ class BeProductBW(BwApi.CallbackBase):
         
         if callbackId == 3:
             info = get_file_info()
+            dump_info(info)
             if info is not None:
                 BwApi.GarmentClose(garmentId, 0)
                 key = json.loads(__post_content__(config.BASE_URL + "api/sync/wizard/turntable?f=" + filename, info))["key"]
