@@ -52,7 +52,7 @@ def debug():
 class WndCallback(BwApi.CallbackBase):
     def Run(self, garment_id, callback_id, data):
               
-        url = 'https://dev-plugin.azurewebsites.net/'
+        url = 'https://beproduct-cdn-vstplugin.azureedge.net/index.html'
         #url = '/index.html'
         title = 'BeProduct Assets'
 
