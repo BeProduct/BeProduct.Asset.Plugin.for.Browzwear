@@ -27,6 +27,7 @@ class IBwApiWndEvents(ABC):
 
 
 class Wnd:
+
     def __init__(self, url: str, title: str, width: int, height: int, style: object):
         self.width = width
         self.height = height
@@ -42,6 +43,7 @@ class Wnd:
         self.delegate = delegate
 
     def __event_handler(self, garment_id: str, callback_id: int, data: str) -> int:
+
         if self.delegate:
             if callback_id == LOAD:
                 self.delegate.on_load(garment_id, callback_id, data)
@@ -74,7 +76,7 @@ class Wnd:
 
         return rect
 
-    def create(self):
+    def show(self):
         style = json.dumps(self.style)
 
         rect = self.get_rect()
@@ -90,9 +92,11 @@ class Wnd:
         BwApi.WndHTMLEventRegister(self.handle, MSG, self.event_handler, MSG)
         BwApi.WndHTMLEventRegister(self.handle, UNCAUGHT_EXCEPTION, self.event_handler, UNCAUGHT_EXCEPTION)
 
-    def focus(self):
-        if self.handle:
-            BwApi.WndHTMLSetFocus(self.handle)
+    def send_message(self, data):
+        BwApi.WndHTMLMessageSend(self.handle, json.dumps(data))
 
-    def get_handle(self) -> int:
-        return self.handle
+    def focus(self):
+        BwApi.WndHTMLSetFocus(self.handle)
+    
+    def close(self):
+        BwApi.WndHTMLClose(self.handle)

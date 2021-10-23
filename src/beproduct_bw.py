@@ -1,4 +1,6 @@
 import BwApi
+from wrappers.wnd import Wnd, IBwApiWndEvents
+
 import urllib.request
 import urllib.parse
 import urllib
@@ -7,6 +9,8 @@ from urllib.parse import urlencode
 import config
 import os
 import json
+import uuid
+import base64
 from datetime import datetime as dt
 from .beproduct_dev_app import BeProduct3DDevelopmentAssets
 
@@ -51,12 +55,147 @@ def get_file_info():
             colorways.append ({"id": colorway_id, "name": BwApi.ColorwayNameGet(garment_id, colorway_id)}) 
         info["colorways"] = colorways
         #info["vstitcherVersion"] = json.loads(BwApi.HostApplicationGet())["version"]
+
+        try:
+            info["style3d"] = update_embedded_json()
+        except:
+            pass
+
         return info
     except:
         return None
 
+def dump_info(obj):
+    fname = BwApi.GarmentPathGet(BwApi.GarmentId()) 
+    filename = os.path.basename(fname)
+    dir = os.path.dirname(fname)
+    jsonpath = os.path.join(dir,'.config',filename+'.json')
+    try:
+        with open(jsonpath,'w') as f:
+            json.dump(obj, f)
+    except:
+        pass
 
+
+def get_bp_material_ids(colorway_id, material_id):
+    if material_id in config.MATERIAL_MAPPING:
+        return config.MATERIAL_MAPPING[material_id]
+
+    def to_guid(bp_string):
+        guid = bp_string.replace('_','/').replace('-','+')                                                                        
+        end = len(guid)%4
+        if end == 2:   
+            guid+= '=='                                                                                                       
+        if end == 3:
+           guid+= '='                                                                                                        
+        mybytes = base64.b64decode(guid)
+        return str(uuid.UUID(bytes_le=mybytes))
+
+    garment_id = BwApi.GarmentId()
+    is_group = BwApi.MaterialGroup(garment_id, colorway_id, material_id)
+    if not is_group:
+        try:
+            mat = json.loads(BwApi.MaterialGet(garment_id, colorway_id, material_id))         
+            keys = mat['custom']['BeProduct'].keys()
+
+            # case popup
+            if 'materialId' in keys and mat['custom']['BeProduct']['materialId'] and 'materialColorId' in keys and mat['custom']['BeProduct']['materialColorId']:
+                return (keys['materialId'], keys['materialColorId'])
+
+            # case library
+            plugin_ids = mat['custom']['BeProduct']['info']['asset_path'].rstrip('/').split('$')
+            bp_cw_id = to_guid(plugin_ids[-1])
+            bp_mat_id = to_guid(plugin_ids[-2])
+            return (bp_mat_id, bp_cw_id)
+
+        except Exception as e:
+            return None
+
+    return None # material is not from BP
+
+def update_embedded_json():
+    garment_id = BwApi.GarmentId()
+    bp_obj = {}
+
+    json_str =BwApi.GarmentInfoGetEx(garment_id, "beproduct")
+    if json_str:
+        bp_obj = json.loads(json.loads(json_str)["value"])
+    if "styleColors" not in bp_obj:
+        bp_obj["styleColors"] = []
+    
+    current_colorway_ids = BwApi.GarmentColorwayIds(garment_id)
+    bp_obj["styleColors"] =  [e for e in bp_obj["styleColors"] if e["bwColorId"] in current_colorway_ids]
+
+    for colorway_id in current_colorway_ids:
+        color_name = BwApi.ColorwayNameGet(garment_id, colorway_id)
+        colorway = next((x for x in bp_obj["styleColors"] if x["bwColorId"] == colorway_id), None) 
+        if not colorway:
+            colorway = {
+                "bwColorId": colorway_id,
+                "materials": []
+            }
+            bp_obj["styleColors"].append(colorway)
+
+        colorway["colorName"] = color_name
+        bw_mat_ids = BwApi.ColorwayUsedMaterialIds(garment_id, colorway_id)
+        mat_ids_to_remove = list(
+            set([e["bwMaterialId"] for e in colorway["materials"]]) - set(bw_mat_ids))
+        colorway["materials"] = [e for e in colorway["materials"] if e["bwMaterialId"] not in mat_ids_to_remove]
+
+        for mat_id in bw_mat_ids:
+            bp_mat_ids = get_bp_material_ids(colorway_id, mat_id)
+            if bp_mat_ids:
+                bp_mat_id = bp_mat_ids[0]
+                bp_mat_cw_id = bp_mat_ids[1]
+                material = next((x for x in colorway["materials"] if x["bwMaterialId"] == mat_id), None) 
+                if not material:
+                    material = {}
+                    colorway["materials"].append(material)
+
+                material["materialId"] = bp_mat_id
+                material["materialColorId"] = bp_mat_cw_id
+                material["bwMaterialId"] = mat_id
+        
+
+    BwApi.GarmentInfoSetEx(garment_id, "beproduct", json.dumps({
+        "show_in_techpack_html": True,
+        "read_only": True,
+        "caption": "beproduct",
+        "value": json.dumps(bp_obj)
+    } )) 
+
+    return bp_obj
+
+class UpdateJsonOnModified(BwApi.CallbackBase):
+    def Run(self, garmentId, callbackId, dataString):
+        try:
+            update_embedded_json()
+        except:
+            pass
+        
+
+class BeProductWnd(IBwApiWndEvents):
+    def __init__(self, key):
+        url = config.BASE_URL.rstrip('/')+"/index.html"
+        self.wnd = Wnd(url + f"#/wizard/turntable/{key}", "Render", 645, 600, {})
+        self.wnd.set_delegate(self)
+        self.wnd.show()
+
+    def on_msg(self, garment_id: str, callback_id: int, data: str) -> None:
+        params = json.loads(data)
+        if params['exit'] == True:
+            self.wnd.close()
+    def on_load(self, garment_id: str, callback_id: int, data: str) -> None:
+        pass
+
+    def on_close(self, garment_id: str, callback_id: int, data: str) -> None:
+        pass 
+       
+    def on_uncaught_exception(self, garment_id: str, callback_id: int, data: str) -> None:
+        print('$$$$$$$$$$$$$$$$ on_uncaught_exception $$$$$$$$$$$$$$$$')
+            
 class BeProductBW(BwApi.CallbackBase):
+
     def Run(self, garmentId, callbackId, dataString):
 
         path_components = os.path.normpath(BwApi.GarmentPathGet(garmentId)).split(os.sep)
@@ -69,11 +208,13 @@ class BeProductBW(BwApi.CallbackBase):
           
         # Sync style
         if callbackId == 0:
+            info = get_file_info()
+            dump_info(info)
             BwApi.GarmentClose(garmentId, 0)
             if not config.USERID and not config.SYNC_STANDALONE:
                 __get_content__(config.BASE_URL + "api/bw/sync-back/" + config.USERID)
             else:
-                __get_content__(config.BASE_URL + "api/sync/sync?f=" + filename)
+                __post_content__(config.BASE_URL + "api/sync/sync?f=" + filename, info)
         
         # Refresh colors  
         if callbackId == 1:
@@ -89,11 +230,15 @@ class BeProductBW(BwApi.CallbackBase):
             BwApi.GarmentClose(garmentId, 0)
             __get_content__(config.BASE_URL + "api/sync/offload/turntable?f=" + filename)
 
+        if callbackId == 4:
+            update_embedded_json()
+        
         if callbackId == 3:
             info = get_file_info()
+            dump_info(info)
             if info is not None:
                 BwApi.GarmentClose(garmentId, 0)
-                info["title"] = "Generate Turntable"
-                __post_content__(config.BASE_URL + "api/sync/wizard/turntable?f=" + filename, info)
-
+                key = json.loads(__post_content__(config.BASE_URL + "api/sync/wizard/turntable?f=" + filename, info))["key"]
+                self.wnd = BeProductWnd(key)
+              
         return 0

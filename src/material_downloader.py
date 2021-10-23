@@ -10,6 +10,7 @@ import urllib.request
 import urllib.parse
 import json
 import os
+import BwApi
 
 
 def load_remote_json(url: str) -> object:
@@ -90,12 +91,37 @@ class MaterialDownloader:
                 if field not in downloaded_material:
                     return
 
+            
             garment_id = downloaded_material['garment_id']
             colorway_id = downloaded_material['colorway_id']
             material_id = downloaded_material['material_id']
 
+
             material = Material(garment_id, colorway_id, material_id)
             material.update_from_file(downloaded_material['material'])
+
+            def inject_bp(mat):
+                mat['custom'] = mat.get('custom',{})
+                mat['custom']['BeProduct'] = mat['custom'].get('BeProduct',{})
+                mat['custom']['BeProduct']["info"] = downloaded_material['metadata']
+                mat['custom']['BeProduct']["materialId"] = None
+                mat['custom']['BeProduct']["materialColorId"] = None
+
+            is_group = BwApi.MaterialGroup(garment_id, colorway_id, material_id)
+
+            if is_group:    
+                
+                mat = json.loads(BwApi.MaterialGroupGet(garment_id, colorway_id, material_id))
+                inject_bp(mat)
+                res = BwApi.MaterialGroupUpdate(garment_id, colorway_id, material_id, json.dumps({"description":"not working"})) 
+            else:
+                mat = json.loads(BwApi.MaterialGet(garment_id, colorway_id, material_id))
+                inject_bp(mat)
+                BwApi.MaterialUpdate(garment_id, colorway_id, material_id, json.dumps(mat))
+
+            #with open('/tmp/test.json','w') as f:
+            #    json.dump(mat,f)
+            # BwApi.WndMessageBox( json.dumps(mat), BwApi.BW_API_MB_OK)
             successful = True
         except:
             pass

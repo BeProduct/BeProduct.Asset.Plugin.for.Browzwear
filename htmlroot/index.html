@@ -1,0 +1,48 @@
+<html>
+    <script type="text/javascript">
+        "use strict";
+
+				function sendMessage(obj) {
+					BwApi.sendMessage(JSON.stringify(obj));
+				}
+
+				BwApi.addMessageListener(function(message) {
+					//var data = JSON.parse(message)
+          alert("Completed: "+message);
+          //document.body.innerHTML += `<pre>${message}</pre>`;
+				});
+    </script>
+Url of u3m material: 
+<input type='text' id='materialUrl'/>
+<button onclick='sendMessage( { "url":document.getElementById("materialUrl").value, "action": "material_add" })'>Add material</button>
+<br>
+
+Color palette:
+<textarea type='text' id='colors'>
+{
+    "name": "RGB",
+    "colors": [
+        {
+            "name": "red",
+            "r": 1,
+            "g": 0,
+            "b": 0
+        },
+        {
+            "name": "green",
+            "r": 0,
+            "g": 1,
+            "b": 0
+        },
+        {
+            "name": "blue",
+            "r": 0,
+            "g": 0,
+            "b": 1
+        }
+    ]
+}
+</textarea>
+<button onclick='sendMessage( { "palette":document.getElementById("colors").value, "action": "colors_add" })'>Add color palette</button>
+<br>
+</html>

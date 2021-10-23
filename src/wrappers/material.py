@@ -14,6 +14,9 @@ class Material:
     def update_from_file(self, data):
         BwApi.MaterialUpdateFromFile(self.garment_id, self.colorway_id, self.material_id, data)
 
+    def add_from_file(self, path):
+        return BwApi.MaterialImport(self.garment_id, self.colorway_id, self.material_id, path)
+
     def update(self, data: object) -> None:
         BwApi.MaterialUpdate(self.garment_id, self.colorway_id, self.material_id, json.dumps(data))
 
