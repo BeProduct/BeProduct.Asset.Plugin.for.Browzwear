@@ -78,8 +78,8 @@ def dump_info(obj):
 
 
 def get_bp_material_ids(colorway_id, material_id):
-    if material_id in config.MATERIAL_MAPPING:
-        return config.MATERIAL_MAPPING[material_id]
+    if (colorway_id, material_id) in config.MATERIAL_MAPPING:
+        return config.MATERIAL_MAPPING[(colorway_id, material_id)]
 
     def to_guid(bp_string):
         guid = bp_string.replace('_','/').replace('-','+')                                                                        
