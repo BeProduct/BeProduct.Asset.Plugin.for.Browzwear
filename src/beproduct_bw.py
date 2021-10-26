@@ -77,8 +77,8 @@ def dump_info(obj):
         pass
 
 
-def get_bp_material_ids(colorway_id, material_id, is_group = False):
-    if is_group and material_id in config.MATERIAL_MAPPING:
+def get_bp_material_ids(colorway_id, material_id):
+    if material_id in config.MATERIAL_MAPPING:
         return config.MATERIAL_MAPPING[material_id]
 
     def to_guid(bp_string):
@@ -143,7 +143,7 @@ def update_embedded_json():
         colorway["materials"] = [e for e in colorway["materials"] if e["bwMaterialId"] not in mat_ids_to_remove]
 
         for mat_id in bw_mat_ids:
-            bp_mat_ids = get_bp_material_ids(colorway_id, mat_id, is_group = BwApi.MaterialGroup(garment_id, colorway_id, mat_id))
+            bp_mat_ids = get_bp_material_ids(colorway_id, mat_id)
             if bp_mat_ids:
                 bp_mat_id = bp_mat_ids[0]
                 bp_mat_cw_id = bp_mat_ids[1]
