@@ -113,7 +113,7 @@ def get_bp_material_ids(colorway_id, material_id):
 
             # case popup
             if 'materialId' in keys and mat['custom']['BeProduct']['materialId'] and 'materialColorId' in keys and mat['custom']['BeProduct']['materialColorId']:
-                return (keys['materialId'], keys['materialColorId'])
+                return (mat['custom']['BeProduct']['materialId'], mat['custom']['BeProduct']['materialColorId'])
 
             # case library
             plugin_ids = mat['custom']['BeProduct']['info']['asset_path'].rstrip('/').split('$')
@@ -126,9 +126,11 @@ def get_bp_material_ids(colorway_id, material_id):
 
     return None # material is not from BP
 
+
 def update_embedded_json():
     garment_id = BwApi.GarmentId()
     bp_obj = {}
+    all_material_ids = []
 
     json_str =BwApi.GarmentInfoGetEx(garment_id, "beproduct")
     if json_str:
@@ -150,7 +152,11 @@ def update_embedded_json():
             bp_obj["styleColors"].append(colorway)
 
         colorway["colorName"] = color_name
+
         bw_mat_ids = BwApi.ColorwayUsedMaterialIds(garment_id, colorway_id)
+
+        all_material_ids.extend([str(x) for x in BwApi.ColorwayMaterialIds(garment_id, colorway_id)])
+
         mat_ids_to_remove = list(
             set([e["bwMaterialId"] for e in colorway["materials"]]) - set(bw_mat_ids))
         colorway["materials"] = [e for e in colorway["materials"] if e["bwMaterialId"] not in mat_ids_to_remove]
@@ -176,6 +182,11 @@ def update_embedded_json():
         "caption": "beproduct",
         "value": json.dumps(bp_obj)
     } )) 
+
+    # cleaning up 
+    for k in config.MATERIAL_MAPPING.keys():
+        if str(k) not in all_material_ids:
+            del config.MATERIAL_MAPPING[k]
 
     BwApi.GarmentInfoSetEx(garment_id, "beproduct_mapping", json.dumps({
         "show_in_techpack_html": False,
