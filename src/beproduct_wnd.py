@@ -106,7 +106,7 @@ class BeProductWnd(IBwApiWndEvents):
                 
             try:
                 mat_id = add_material_from_url(params['url'])[0]
-                config.MATERIAL_MAPPING[(colorway_id, mat_id)] = (params['materialId'], params['materialColorId'])
+                config.MATERIAL_MAPPING[mat_id] = (params['materialId'], params['materialColorId'])
 
                 is_group = BwApi.MaterialGroup(garment_id, colorway_id, mat_id)
 
