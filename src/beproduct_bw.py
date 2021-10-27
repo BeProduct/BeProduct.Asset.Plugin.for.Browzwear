@@ -92,10 +92,9 @@ def get_bp_material_ids(colorway_id, material_id):
         else:
             config.MATERIAL_MAPPING = {}
 
-
     ensure_mapping()
-    if is_group and material_id in config.MATERIAL_MAPPING:
-        return config.MATERIAL_MAPPING[material_id]
+    if is_group and str(material_id) in config.MATERIAL_MAPPING:
+        return config.MATERIAL_MAPPING[str(material_id)]
 
     def to_guid(bp_string):
         guid = bp_string.replace('_','/').replace('-','+')                                                                        
