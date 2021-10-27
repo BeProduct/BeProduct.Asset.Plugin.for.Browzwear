@@ -81,6 +81,19 @@ def get_bp_material_ids(colorway_id, material_id):
     garment_id = BwApi.GarmentId()
     is_group = BwApi.MaterialGroup(garment_id, colorway_id, material_id)
 
+    def ensure_mapping():
+        if config.MATERIAL_MAPPING:
+            return
+        json_str = BwApi.GarmentInfoGetEx(garment_id, "beproduct_mapping")
+        if json_str:
+            mapping = json.loads(json.loads(json_str)["value"])
+            if mapping and type(mapping) is dict:
+                config.MATERIAL_MAPPING = mapping
+        else:
+            config.MATERIAL_MAPPING = {}
+
+
+    ensure_mapping()
     if is_group and material_id in config.MATERIAL_MAPPING:
         return config.MATERIAL_MAPPING[material_id]
 
