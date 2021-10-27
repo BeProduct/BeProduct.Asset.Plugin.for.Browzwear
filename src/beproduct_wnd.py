@@ -97,8 +97,8 @@ class BeProductWnd(IBwApiWndEvents):
                 mapping = json.loads(json.loads(json_str)["value"])
                 if mapping and type(mapping) is dict:
                     config.MATERIAL_MAPPING = mapping
-            else:
-                config.MATERIAL_MAPPING = {}
+                    return
+            config.MATERIAL_MAPPING = {}
 
         params = json.loads(data)
         if params['action'] == 'material_add':
