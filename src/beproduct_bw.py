@@ -89,8 +89,8 @@ def get_bp_material_ids(colorway_id, material_id):
             mapping = json.loads(json.loads(json_str)["value"])
             if mapping and type(mapping) is dict:
                 config.MATERIAL_MAPPING = mapping
-        else:
-            config.MATERIAL_MAPPING = {}
+                return
+        config.MATERIAL_MAPPING = {}
 
     ensure_mapping()
     if is_group and str(material_id) in config.MATERIAL_MAPPING:
