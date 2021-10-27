@@ -5,6 +5,8 @@ import urllib
 import config
 import os
 import json
+
+from wrappers.material import Material
 from .remote_asset_library import RemoteAssetLibrary
 
 def __get_content__(url):
@@ -15,7 +17,13 @@ class BeProduct3DDevelopmentAssets(BwApi.CallbackBase):
     library = None 
     colors = []
     def Run(self, garmentId, callbackId, dataString):
-        config.MATERIAL_MAPPING = {}
+        json_str = BwApi.GarmentInfoGetEx(garmentId, "beproduct_mapping")
+        if json_str:
+            mapping = json.loads(json.loads(json_str)["value"])
+            if mapping and type(mapping) is dict:
+                config.MATERIAL_MAPPING = mapping
+        else:
+            config.MATERIAL_MAPPING = {}
 
         ind = 0
         path_components = os.path.normpath(BwApi.GarmentPathGet(garmentId)).split(os.sep)

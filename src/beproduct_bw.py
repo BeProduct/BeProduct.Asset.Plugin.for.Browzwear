@@ -78,7 +78,10 @@ def dump_info(obj):
 
 
 def get_bp_material_ids(colorway_id, material_id):
-    if material_id in config.MATERIAL_MAPPING:
+    garment_id = BwApi.GarmentId()
+    is_group = BwApi.MaterialGroup(garment_id, colorway_id, material_id)
+
+    if is_group and material_id in config.MATERIAL_MAPPING:
         return config.MATERIAL_MAPPING[material_id]
 
     def to_guid(bp_string):
@@ -91,8 +94,6 @@ def get_bp_material_ids(colorway_id, material_id):
         mybytes = base64.b64decode(guid)
         return str(uuid.UUID(bytes_le=mybytes))
 
-    garment_id = BwApi.GarmentId()
-    is_group = BwApi.MaterialGroup(garment_id, colorway_id, material_id)
     if not is_group:
         try:
             mat = json.loads(BwApi.MaterialGet(garment_id, colorway_id, material_id))         
@@ -162,6 +163,13 @@ def update_embedded_json():
         "read_only": True,
         "caption": "beproduct",
         "value": json.dumps(bp_obj)
+    } )) 
+
+    BwApi.GarmentInfoSetEx(garment_id, "beproduct_mapping", json.dumps({
+        "show_in_techpack_html": False,
+        "read_only": True,
+        "caption": "beproduct_mapping",
+        "value": json.dumps(config.MATERIAL_MAPPING)
     } )) 
 
     return bp_obj
