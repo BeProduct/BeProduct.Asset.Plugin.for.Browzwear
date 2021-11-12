@@ -5,6 +5,8 @@ import urllib
 import config
 import os
 import json
+
+from wrappers.material import Material
 from .remote_asset_library import RemoteAssetLibrary
 
 def __get_content__(url):
@@ -15,8 +17,7 @@ class BeProduct3DDevelopmentAssets(BwApi.CallbackBase):
     library = None 
     colors = []
     def Run(self, garmentId, callbackId, dataString):
-        config.MATERIAL_MAPPING = {}
-
+        config.MATERIAL_MAPPING = None
         ind = 0
         path_components = os.path.normpath(BwApi.GarmentPathGet(garmentId)).split(os.sep)
         if path_components[-1].lower().endswith('.bw'):

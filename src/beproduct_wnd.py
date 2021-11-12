@@ -89,6 +89,17 @@ class BeProductWnd(IBwApiWndEvents):
         self.wnd = None
 
     def on_msg(self, garment_id: str, callback_id: int, data: str) -> None:
+        def ensure_mapping():
+            if config.MATERIAL_MAPPING is not None :
+                return
+            json_str = BwApi.GarmentInfoGetEx(garment_id, "beproduct_mapping")
+            if json_str:
+                mapping = json.loads(json.loads(json_str)["value"])
+                if mapping and type(mapping) is dict:
+                    config.MATERIAL_MAPPING = mapping
+                    return
+            config.MATERIAL_MAPPING = {}
+
         params = json.loads(data)
         if params['action'] == 'material_add':
 
@@ -106,7 +117,8 @@ class BeProductWnd(IBwApiWndEvents):
                 
             try:
                 mat_id = add_material_from_url(params['url'])[0]
-                config.MATERIAL_MAPPING[mat_id] = (params['materialId'], params['materialColorId'])
+                ensure_mapping()
+                config.MATERIAL_MAPPING[str(mat_id)] = (params['materialId'], params['materialColorId'])
 
                 is_group = BwApi.MaterialGroup(garment_id, colorway_id, mat_id)
 

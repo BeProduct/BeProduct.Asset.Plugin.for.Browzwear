@@ -78,8 +78,23 @@ def dump_info(obj):
 
 
 def get_bp_material_ids(colorway_id, material_id):
-    if material_id in config.MATERIAL_MAPPING:
-        return config.MATERIAL_MAPPING[material_id]
+    garment_id = BwApi.GarmentId()
+    is_group = BwApi.MaterialGroup(garment_id, colorway_id, material_id)
+
+    def ensure_mapping():
+        if config.MATERIAL_MAPPING:
+            return
+        json_str = BwApi.GarmentInfoGetEx(garment_id, "beproduct_mapping")
+        if json_str:
+            mapping = json.loads(json.loads(json_str)["value"])
+            if mapping and type(mapping) is dict:
+                config.MATERIAL_MAPPING = mapping
+                return
+        config.MATERIAL_MAPPING = {}
+
+    ensure_mapping()
+    if is_group and str(material_id) in config.MATERIAL_MAPPING:
+        return config.MATERIAL_MAPPING[str(material_id)]
 
     def to_guid(bp_string):
         guid = bp_string.replace('_','/').replace('-','+')                                                                        
@@ -91,8 +106,6 @@ def get_bp_material_ids(colorway_id, material_id):
         mybytes = base64.b64decode(guid)
         return str(uuid.UUID(bytes_le=mybytes))
 
-    garment_id = BwApi.GarmentId()
-    is_group = BwApi.MaterialGroup(garment_id, colorway_id, material_id)
     if not is_group:
         try:
             mat = json.loads(BwApi.MaterialGet(garment_id, colorway_id, material_id))         
@@ -100,7 +113,7 @@ def get_bp_material_ids(colorway_id, material_id):
 
             # case popup
             if 'materialId' in keys and mat['custom']['BeProduct']['materialId'] and 'materialColorId' in keys and mat['custom']['BeProduct']['materialColorId']:
-                return (keys['materialId'], keys['materialColorId'])
+                return (mat['custom']['BeProduct']['materialId'], mat['custom']['BeProduct']['materialColorId'])
 
             # case library
             plugin_ids = mat['custom']['BeProduct']['info']['asset_path'].rstrip('/').split('$')
@@ -113,9 +126,11 @@ def get_bp_material_ids(colorway_id, material_id):
 
     return None # material is not from BP
 
+
 def update_embedded_json():
     garment_id = BwApi.GarmentId()
     bp_obj = {}
+    all_material_ids = []
 
     json_str =BwApi.GarmentInfoGetEx(garment_id, "beproduct")
     if json_str:
@@ -137,7 +152,11 @@ def update_embedded_json():
             bp_obj["styleColors"].append(colorway)
 
         colorway["colorName"] = color_name
+
         bw_mat_ids = BwApi.ColorwayUsedMaterialIds(garment_id, colorway_id)
+
+        all_material_ids.extend([str(x) for x in BwApi.ColorwayMaterialIds(garment_id, colorway_id)])
+
         mat_ids_to_remove = list(
             set([e["bwMaterialId"] for e in colorway["materials"]]) - set(bw_mat_ids))
         colorway["materials"] = [e for e in colorway["materials"] if e["bwMaterialId"] not in mat_ids_to_remove]
@@ -162,6 +181,18 @@ def update_embedded_json():
         "read_only": True,
         "caption": "beproduct",
         "value": json.dumps(bp_obj)
+    } )) 
+
+    # cleaning up 
+    for k in config.MATERIAL_MAPPING.keys():
+        if str(k) not in all_material_ids:
+            del config.MATERIAL_MAPPING[k]
+
+    BwApi.GarmentInfoSetEx(garment_id, "beproduct_mapping", json.dumps({
+        "show_in_techpack_html": False,
+        "read_only": True,
+        "caption": "beproduct_mapping",
+        "value": json.dumps(config.MATERIAL_MAPPING)
     } )) 
 
     return bp_obj
