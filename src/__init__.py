@@ -88,6 +88,7 @@ def BwApiPluginInit() -> int:
         # BwApi.MenuFunctionAdd('Sync Color Libraries', sync_callback, 1)
         BwApi.MenuFunctionAdd('Sync From Local Folder', sync_callback, 0)
         BwApi.MenuFunctionAdd('Sync To Cloud', sync_callback, 3)
+        BwApi.MenuFunctionAdd('Settings', sync_callback, 5)
         BwApi.MenuFunctionReloadAdd()
         # register to file -> open event
         BwApi.EventRegister(fileopenthandler, 1, BwApi.BW_API_EVENT_GARMENT_OPEN)
