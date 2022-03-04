@@ -47,6 +47,11 @@ def get_local_settings():
         }
 
     settings["lights"] = [o(l) for l in BwApi.EnvironmentLights()]
+
+    default_camera_views = ["Front", "Left", "Back", "Right", "Top", "Bottom"]
+    settings["cameraViews"] = [
+        cv for cv in BwApi.EnvironmentCameraViews() if cv not in default_camera_views
+    ]
     return settings
 
 
@@ -270,7 +275,11 @@ class UpdateJsonOnModified(BwApi.CallbackBase):
 
 class BeProductWnd(IBwApiWndEvents):
     def __init__(self, key, path=None):
-        url = config.BASE_URL.rstrip("/") + "/index.html"
+        url = (
+            ""
+            if path.startswith("http")
+            else config.BASE_URL.rstrip("/") + "/index.html"
+        )
         self.wnd = Wnd(
             url + path if path else f"#/wizard/turntable/{key}", "Render", 645, 600, {}
         )
@@ -279,8 +288,18 @@ class BeProductWnd(IBwApiWndEvents):
 
     def on_msg(self, garment_id: str, callback_id: int, data: str) -> None:
         params = json.loads(data)
-        if params["exit"] == True:
-            self.wnd.close()
+        if "syncCameraViews" in params:
+            for cv in params["syncCameraViews"]:
+                import tempfile
+
+                tf = tempfile.NamedTemporaryFile(delete=False)
+                fname = tf.name
+                tf.close()
+                BwApi.EnvironmentCameraViewExport(cv["name"], fname)
+                cv["fileSource"] = fname
+            __post_content__(
+                config.BASE_URL + "api/bw/synccameraviews", params["syncCameraViews"]
+            )
 
     def on_load(self, garment_id: str, callback_id: int, data: str) -> None:
         pass
@@ -362,6 +381,7 @@ class BeProductBW(BwApi.CallbackBase):
         if callbackId == 5:
             settings = get_local_settings()
             __post_content__(config.BASE_URL + "api/sync/wizard/envsettings", settings)
+            # self.wnd = BeProductWnd(None, "http://localhost:3000/#/settings")
             self.wnd = BeProductWnd(None, "#/settings")
 
         return 0
