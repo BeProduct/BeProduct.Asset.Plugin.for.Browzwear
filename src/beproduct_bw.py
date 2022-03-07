@@ -274,14 +274,18 @@ class UpdateJsonOnModified(BwApi.CallbackBase):
 
 
 class BeProductWnd(IBwApiWndEvents):
-    def __init__(self, key, path=None):
+    def __init__(self, key, path=None, width=620, height=420, title="BeProduct"):
         url = (
             ""
-            if path.startswith("http")
+            if path and path.startswith("http")
             else config.BASE_URL.rstrip("/") + "/index.html"
         )
         self.wnd = Wnd(
-            url + path if path else f"#/wizard/turntable/{key}", "Render", 645, 600, {}
+            url + (path if path else f"#/wizard/turntable/{key}"),
+            title,
+            width,
+            height,
+            {},
         )
         self.wnd.set_delegate(self)
         self.wnd.show()
@@ -376,12 +380,14 @@ class BeProductBW(BwApi.CallbackBase):
                         info,
                     )
                 )["key"]
-                self.wnd = BeProductWnd(key)
+                self.wnd = BeProductWnd(
+                    key, width=1020, height=640, title="BEPRODUCT SYNC"
+                )
 
         if callbackId == 5:
             settings = get_local_settings()
             __post_content__(config.BASE_URL + "api/sync/wizard/envsettings", settings)
             # self.wnd = BeProductWnd(None, "http://localhost:3000/#/settings")
-            self.wnd = BeProductWnd(None, "#/settings")
+            self.wnd = BeProductWnd(None, "#/settings", title="BEPRODUCT SETTINGS")
 
         return 0
