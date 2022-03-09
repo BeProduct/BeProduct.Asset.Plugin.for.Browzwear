@@ -274,7 +274,7 @@ class UpdateJsonOnModified(BwApi.CallbackBase):
 
 
 class BeProductWnd(IBwApiWndEvents):
-    def __init__(self, key, path=None, width=620, height=420, title="BeProduct"):
+    def __init__(self, key, path=None, width=620, height=390, title="BeProduct"):
         url = (
             ""
             if path and path.startswith("http")
@@ -292,6 +292,9 @@ class BeProductWnd(IBwApiWndEvents):
 
     def on_msg(self, garment_id: str, callback_id: int, data: str) -> None:
         params = json.loads(data)
+        if "exit" in params and params["exit"]:
+            self.wnd.close()
+
         if "syncCameraViews" in params:
             for cv in params["syncCameraViews"]:
                 import tempfile
@@ -381,7 +384,7 @@ class BeProductBW(BwApi.CallbackBase):
                     )
                 )["key"]
                 self.wnd = BeProductWnd(
-                    key, width=1020, height=640, title="BEPRODUCT SYNC"
+                    key, width=1020, height=610, title="BEPRODUCT SYNC"
                 )
 
         if callbackId == 5:
