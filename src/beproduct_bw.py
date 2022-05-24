@@ -245,9 +245,11 @@ def update_embedded_json():
     )
 
     # cleaning up
-    for k in config.MATERIAL_MAPPING.keys():
-        if str(k) not in all_material_ids:
-            del config.MATERIAL_MAPPING[k]
+    keys_to_cleanup = [
+        k for k in config.MATERIAL_MAPPING.keys() if str(k) not in all_material_ids
+    ]
+    for k in keys_to_cleanup:
+        del config.MATERIAL_MAPPING[k]
 
     BwApi.GarmentInfoSetEx(
         garment_id,
