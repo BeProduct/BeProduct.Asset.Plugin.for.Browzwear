@@ -92,7 +92,7 @@ def get_file_info():
 
         try:
             info["style3d"] = update_embedded_json()
-        except:
+        except Exception as e:
             pass
 
         return info
@@ -378,13 +378,34 @@ class BeProductBW(BwApi.CallbackBase):
             info = get_file_info()
             dump_info(info)
             if info is not None:
+
+                infoFromBw = None
+                json_str = BwApi.GarmentInfoGetEx(garmentId, "beproduct_version")
+                if json_str:
+                    version = json.loads(json.loads(json_str)["value"])
+                    if version and type(version) is dict:
+                        header_id = version.get("headerId", None)
+                        if header_id:
+                            infoFromBw = f"&headerId={header_id}"
+
                 BwApi.GarmentClose(garmentId, 0)
+                url = (
+                    (
+                        "api/sync/wizardanyfilelocation/turntable?f="
+                        + filename
+                        + infoFromBw
+                    )
+                    if infoFromBw
+                    else ("api/sync/wizard/turntable?f=" + filename)
+                )
+
                 key = json.loads(
                     __post_content__(
-                        config.BASE_URL + "api/sync/wizard/turntable?f=" + filename,
+                        config.BASE_URL + url,
                         info,
                     )
                 )["key"]
+
                 self.wnd = BeProductWnd(
                     key, width=1020, height=610, title="BEPRODUCT SYNC"
                 )

@@ -10,7 +10,7 @@ sys.path.append(
     )
 )
 
-DEBUG = False
+DEBUG = True 
 
 SSL_CONTEXT = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS)
 SSL_CONTEXT.verify_mode = ssl.CERT_OPTIONAL
@@ -84,3 +84,4 @@ if not SYNC_CLIENT_RUNNING:
         ERROR = exc
 
 MATERIAL_MAPPING = None
+STYLE_INFO = None

@@ -9,45 +9,100 @@ import json
 from wrappers.material import Material
 from .remote_asset_library import RemoteAssetLibrary
 
+
 def __get_content__(url):
     response = urllib.request.urlopen(url, context=config.SSL_CONTEXT)
-    return response.read().decode('utf-8')
-    
+    return response.read().decode("utf-8")
+
+
 class BeProduct3DDevelopmentAssets(BwApi.CallbackBase):
-    library = None 
+    library = None
     colors = []
+
     def Run(self, garmentId, callbackId, dataString):
+
+        # Reset materials for current file
         config.MATERIAL_MAPPING = None
+
+        config.STYLE_INFO = None
         ind = 0
-        path_components = os.path.normpath(BwApi.GarmentPathGet(garmentId)).split(os.sep)
-        if path_components[-1].lower().endswith('.bw'):
-            ind=1
+        path_components = os.path.normpath(BwApi.GarmentPathGet(garmentId)).split(
+            os.sep
+        )
+        if path_components[-1].lower().endswith(".bw"):
+            ind = 1
+
+        i = ind - 1
+        filename = "%2F".join(
+            map(urllib.parse.quote, path_components[: i if i != 0 else None])
+        )
+
+        if config.STYLE_INFO is None:
+            # Try to get style info if exists
+            # then embed into BW
+            inputjson = json.loads(
+                __get_content__(config.BASE_URL + "api/bw/getinputjson?f=" + filename)
+            )
+            config.STYLE_INFO = {"inputJson": inputjson["inputjson"]}
+            BwApi.GarmentInfoSetEx(
+                BwApi.GarmentId(),
+                "beproduct_version",
+                json.dumps(
+                    {
+                        "show_in_techpack_html": False,
+                        "read_only": True,
+                        "caption": "beproduct_version",
+                        "value": json.dumps(
+                            {
+                                "headerId": config.STYLE_INFO.get("inputJson", {}).get(
+                                    "headerId", None
+                                ),
+                                "versionId": config.STYLE_INFO.get("inputJson", {}).get(
+                                    "versionId", None
+                                ),
+                            }
+                        ),
+                    }
+                ),
+            )
+
         if len(path_components) > 6:
 
             # materials from 3d development app
-            i = ind - 1
-            filename = "%2F".join(map(urllib.parse.quote,path_components[:i if i != 0 else None]))
-            if BeProduct3DDevelopmentAssets.library is not None \
-                and BeProduct3DDevelopmentAssets.library.library is not None \
-                and BeProduct3DDevelopmentAssets.library.library.library_id:
 
-                BwApi.AssetLibRemove(BeProduct3DDevelopmentAssets.library.library.library_id)
-            libs = json.loads(__get_content__(config.BASE_URL + "api/bw/getfilelibraries?f=" + filename))
+            if (
+                BeProduct3DDevelopmentAssets.library is not None
+                and BeProduct3DDevelopmentAssets.library.library is not None
+                and BeProduct3DDevelopmentAssets.library.library.library_id
+            ):
+
+                BwApi.AssetLibRemove(
+                    BeProduct3DDevelopmentAssets.library.library.library_id
+                )
+
+            libs = json.loads(
+                __get_content__(
+                    config.BASE_URL + "api/bw/getfilelibraries?f=" + filename
+                )
+            )
             for lib in libs:
                 BeProduct3DDevelopmentAssets.library = RemoteAssetLibrary(lib)
                 BeProduct3DDevelopmentAssets.library.initialize()
 
-
-            # colors for 3d development app 
+            # colors for 3d development app
 
             while BeProduct3DDevelopmentAssets.colors:
-                BwApi.ColorLibraryRemove(garmentId, BeProduct3DDevelopmentAssets.colors.pop(0))
+                BwApi.ColorLibraryRemove(
+                    garmentId, BeProduct3DDevelopmentAssets.colors.pop(0)
+                )
 
-            colors_json = __get_content__(config.BASE_URL + "api/bw/colors?api-version=2.0&f=" + filename)
+            colors_json = __get_content__(
+                config.BASE_URL + "api/bw/colors?api-version=2.0&f=" + filename
+            )
 
             for col in json.loads(colors_json):
-                BeProduct3DDevelopmentAssets.colors.append(BwApi.ColorLibraryCreate(garmentId, json.dumps(col)))
-
-          
+                BeProduct3DDevelopmentAssets.colors.append(
+                    BwApi.ColorLibraryCreate(garmentId, json.dumps(col))
+                )
 
         return 0
