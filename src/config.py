@@ -10,7 +10,7 @@ sys.path.append(
     )
 )
 
-DEBUG = True 
+DEBUG = False
 
 SSL_CONTEXT = ssl.SSLContext(protocol=ssl.PROTOCOL_TLS)
 SSL_CONTEXT.verify_mode = ssl.CERT_OPTIONAL

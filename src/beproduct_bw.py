@@ -376,7 +376,7 @@ class BeProductBW(BwApi.CallbackBase):
 
         if callbackId == 3:
             info = get_file_info()
-            dump_info(info)
+            # dump_info(info)
             if info is not None:
 
                 infoFromBw = None
@@ -384,9 +384,10 @@ class BeProductBW(BwApi.CallbackBase):
                 if json_str:
                     version = json.loads(json.loads(json_str)["value"])
                     if version and type(version) is dict:
-                        header_id = version.get("headerId", None)
+                        header_id = version.get("inputjson", {}).get("headerId", None)
                         if header_id:
                             infoFromBw = f"&headerId={header_id}"
+                            info["metafiles"] = version
 
                 BwApi.GarmentClose(garmentId, 0)
                 url = (

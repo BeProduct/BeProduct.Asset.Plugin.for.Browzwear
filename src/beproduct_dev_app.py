@@ -24,7 +24,6 @@ class BeProduct3DDevelopmentAssets(BwApi.CallbackBase):
         # Reset materials for current file
         config.MATERIAL_MAPPING = None
 
-        config.STYLE_INFO = None
         ind = 0
         path_components = os.path.normpath(BwApi.GarmentPathGet(garmentId)).split(
             os.sep
@@ -37,13 +36,13 @@ class BeProduct3DDevelopmentAssets(BwApi.CallbackBase):
             map(urllib.parse.quote, path_components[: i if i != 0 else None])
         )
 
-        if config.STYLE_INFO is None:
-            # Try to get style info if exists
-            # then embed into BW
-            inputjson = json.loads(
-                __get_content__(config.BASE_URL + "api/bw/getinputjson?f=" + filename)
-            )
-            config.STYLE_INFO = {"inputJson": inputjson["inputjson"]}
+        # Try to get style info if exists
+        # then embed into BW
+        inputjson = json.loads(
+            __get_content__(config.BASE_URL + "api/bw/getsyncinfo?f=" + filename)
+        )
+        if inputjson["found"]:
+            config.STYLE_INFO = inputjson
             BwApi.GarmentInfoSetEx(
                 BwApi.GarmentId(),
                 "beproduct_version",
@@ -52,21 +51,16 @@ class BeProduct3DDevelopmentAssets(BwApi.CallbackBase):
                         "show_in_techpack_html": False,
                         "read_only": True,
                         "caption": "beproduct_version",
-                        "value": json.dumps(
-                            {
-                                "headerId": config.STYLE_INFO.get("inputJson", {}).get(
-                                    "headerId", None
-                                ),
-                                "versionId": config.STYLE_INFO.get("inputJson", {}).get(
-                                    "versionId", None
-                                ),
-                            }
-                        ),
+                        "value": json.dumps(inputjson),
                     }
                 ),
             )
+        else:
+            json_str = BwApi.GarmentInfoGetEx(garmentId, "beproduct_version")
+            if json_str:
+                inputjson = json.loads(json.loads(json_str)["value"])
 
-        if len(path_components) > 6:
+        if len(path_components) > 6 or inputjson["found"]:
 
             # materials from 3d development app
 
@@ -82,7 +76,14 @@ class BeProduct3DDevelopmentAssets(BwApi.CallbackBase):
 
             libs = json.loads(
                 __get_content__(
-                    config.BASE_URL + "api/bw/getfilelibraries?f=" + filename
+                    config.BASE_URL
+                    + "api/bw/getfilelibraries?f="
+                    + filename
+                    + (
+                        f"&h={inputjson['inputjson']['headerId']}&v={inputjson['inputjson']['versionId']}"
+                        if inputjson["found"]
+                        else ""
+                    )
                 )
             )
             for lib in libs:
