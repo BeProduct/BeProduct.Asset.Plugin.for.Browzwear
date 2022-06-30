@@ -4,11 +4,13 @@ import os
 import os.path
 import tempfile
 
+
 from urllib.request import urlopen
 from urllib.parse import urlparse, urlunparse, quote
 import json
 import ssl
 import config
+
 
 context = ssl._create_unverified_context()
 
@@ -158,6 +160,7 @@ class BeProductWnd(IBwApiWndEvents):
 
         if params["action"] == "init":
             self.wnd.send_message({"type": "init", "file_info": get_bw_file_info()})
+
 
     def on_uncaught_exception(
         self, garment_id: str, callback_id: int, data: str

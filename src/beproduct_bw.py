@@ -13,6 +13,7 @@ import uuid
 import base64
 from datetime import datetime as dt
 from .beproduct_dev_app import BeProduct3DDevelopmentAssets
+from render import render
 
 
 def __get_content__(url):
@@ -294,8 +295,29 @@ class BeProductWnd(IBwApiWndEvents):
 
     def on_msg(self, garment_id: str, callback_id: int, data: str) -> None:
         params = json.loads(data)
+
+        if params.get("action", "") == "render":
+            processed_path, error = render(params["params"])
+            if not error:
+                __post_content__(
+                    config.BASE_URL + "api/sync/localrender",
+                    {"path": processed_path, "wizard": params["params"]},
+                )
+            else:
+                __post_content__(
+                    config.BASE_URL + "api/notification/msg",
+                    {
+                        "body": "ERROR! VStitcher render error.",
+                        "logMessage": f"ERROR!. {json.dumps(params)}\n{error}",
+                    },
+                )
+
+            self.wnd.close()
+            return
+
         if "exit" in params and params["exit"]:
             self.wnd.close()
+            return
 
         if "syncCameraViews" in params:
             for cv in params["syncCameraViews"]:
