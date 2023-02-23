@@ -20,7 +20,8 @@ def download_remote_resource(dest_path: str, source_url: str) -> None:
         parts = urlparse(url)
         return urlunparse(parts._replace(path=quote(parts.path)))
 
-    response = urlopen(url_fix(source_url), context=context)
+    # response = urlopen(url_fix(source_url), context=context)
+    response = urlopen(source_url, context=context)
     text = response.read()
 
     if not os.path.exists(os.path.dirname(dest_path)):
