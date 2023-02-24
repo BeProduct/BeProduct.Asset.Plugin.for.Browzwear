@@ -1,13 +1,13 @@
 {
     "identifier": "com.beproduct.asset-library",
-    "name": "BeProduct-4.0.17",
+    "name": "BeProduct-4.0.18",
     "html": {
         "white_list": [
             "*"
         ],
         "html_root": "htmlroot"
     },
-    "version": "4.0.0017",
+    "version": "4.0.0018",
     "main": "src",
     "type": "python",
     "dependencies": {
