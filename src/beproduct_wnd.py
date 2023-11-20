@@ -52,6 +52,14 @@ def upsert_color_palette(palette):
     BwApi.ColorLibraryCreate(garment_id, json.dumps(palette))
 
 
+def get_access_token() -> str:
+    url = "https://local.beproduct.org:55862/api/bw/token"
+
+    response = urlopen(url, context=context)
+    t = json.loads(response.read().decode("utf-8"))
+    return (t or {}).get("accessToken", None)
+
+
 def get_bw_file_info() -> str:
     ind = 0
     path_components = os.path.normpath(BwApi.GarmentPathGet(BwApi.GarmentId())).split(
@@ -113,7 +121,6 @@ class BeProductWnd(IBwApiWndEvents):
 
         params = json.loads(data)
         if params["action"] == "material_add":
-
             garment_id = BwApi.GarmentId()
             colorway_id = BwApi.ColorwayCurrentGet(garment_id)
 
@@ -161,6 +168,9 @@ class BeProductWnd(IBwApiWndEvents):
 
         if params["action"] == "init":
             self.wnd.send_message({"type": "init", "file_info": get_bw_file_info()})
+
+        if params["action"] == "token":
+            self.wnd.send_message({"type": "token", "accessToken": get_access_token()})
 
     def on_uncaught_exception(
         self, garment_id: str, callback_id: int, data: str

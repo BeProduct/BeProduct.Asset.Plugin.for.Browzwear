@@ -7,7 +7,7 @@ import config
 
 def __get_content__(url):
     response = urllib.request.urlopen(url, context=config.SSL_CONTEXT)
-    return response.read().decode('utf-8')
+    return response.read().decode("utf-8")
 
 
 class AssetLibRemoteStorage:
@@ -21,20 +21,34 @@ class AssetLibRemoteStorage:
         return self.library_json
 
     def get_collections(self):
-        collection_url = urllib.parse.urljoin(self.base_url, urllib.parse.quote(
-            'api/bw/collections/' + config.USERID + self.library_json['metadata']['tag']))
-        return __get_content__(collection_url)
+        collection_url = urllib.parse.urljoin(
+            self.base_url,
+            urllib.parse.quote(
+                "api/bw/collections/"
+                + config.USERID
+                + self.library_json["metadata"]["tag"]
+            ),
+        )
+        content = __get_content__(collection_url)
+        return content
 
     def get_assets(self):
-        assets_url = urllib.parse.urljoin(self.base_url, urllib.parse.quote(
-            'api/bw/assets/' + config.USERID + self.library_json['metadata']['tag']))
+        assets_url = urllib.parse.urljoin(
+            self.base_url,
+            urllib.parse.quote(
+                "api/bw/assets/" + config.USERID + self.library_json["metadata"]["tag"]
+            ),
+        )
         return __get_content__(assets_url)
 
     def get_base_assets_path(self, live=False):
         if live:
-            return urllib.parse.urljoin(self.base_url, 'api/bw/live-assets/')
+            return urllib.parse.urljoin(self.base_url, "api/bw/live-assets/")
         else:
-            return urllib.parse.urljoin(self.base_url, 'assets/' + self.library_json['metadata']['company'] + '/')
+            return urllib.parse.urljoin(
+                self.base_url,
+                "assets/" + self.library_json["metadata"]["company"] + "/",
+            )
 
     def get_base_path(self):
         return self.base_url

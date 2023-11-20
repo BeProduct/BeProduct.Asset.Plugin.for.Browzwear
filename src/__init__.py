@@ -13,7 +13,7 @@ from .beproduct_wnd import BeProductWnd
 
 def __get_content__(url):
     response = urllib.request.urlopen(url, context=config.SSL_CONTEXT)
-    return response.read().decode('utf-8')
+    return response.read().decode("utf-8")
 
 
 class Main(bwapi_wrapper.IBwApiEvents):
@@ -21,14 +21,20 @@ class Main(bwapi_wrapper.IBwApiEvents):
         super().__init__()
         self.libraries = []
 
-        libs = json.loads(__get_content__(
-        urllib.parse.urljoin(config.BASE_URL, 'api/bw/libraries/' + config.USERID)))
+        libs = json.loads(
+            __get_content__(
+                urllib.parse.urljoin(
+                    config.BASE_URL, "api/bw/libraries/" + config.USERID
+                )
+            )
+        )
         for lib in libs:
             self.libraries.append(RemoteAssetLibrary(lib))
 
     def on_post_initialize(self):
         for lib in self.libraries:
             lib.initialize()
+
 
 def debug():
     if config.DEBUG:
@@ -42,58 +48,66 @@ def debug():
             # pydevd.settrace('localhost', port=9095, stdoutToServer=True, stderrToServer=True)
             # pydevd.settrace('localhost', port=5678, stdoutToServer=True, stderrToServer=True)
             import ptvsd
-            ptvsd.enable_attach(address=('0.0.0.0', 3000), redirect_output=True)
+
+            ptvsd.enable_attach(address=("0.0.0.0", 3000), redirect_output=True)
             # Pause the program until a remote debugger is attached
             ptvsd.wait_for_attach()
             breakpoint()
         except:
             pass
 
+
 class WndCallback(BwApi.CallbackBase):
     def Run(self, garment_id, callback_id, data):
-              
-        url = 'https://beproduct-vstplugin.azurewebsites.net/index.html'
-        #url = '/index.html'
-        title = 'BeProduct Assets'
+        url = "https://prod-beproduct-vstitcher-plugin.azurewebsites.net/index.html"
+        # url = "http://localhost:44304/index.html"
+        # rl = "https://8da810229a9e.ngrok.app/index.html"
+
+        title = "BeProduct Assets"
 
         if callback_id == 0:
-            urlSuffix = ''
-            title = 'BeProduct Materials'
-            mat_wnd.show_window({
-                'url': url + urlSuffix,
-                'title': title,
-                'width': 1280,
-                'height': 800,
-                'style': {}
-                })
+            urlSuffix = ""
+            title = "BeProduct Materials"
+            mat_wnd.show_window(
+                {
+                    "url": url + urlSuffix,
+                    "title": title,
+                    "width": 1280,
+                    "height": 800,
+                    "style": {},
+                }
+            )
 
         if callback_id == 1:
-            urlSuffix = '?target=colors'
-            title = 'BeProduct Colors'
-            
-            col_wnd.show_window({
-                'url': url + urlSuffix,
-                'title': title,
-                'width': 1280,
-                'height': 800,
-                'style': {}
-                })
+            urlSuffix = "?target=colors"
+            title = "BeProduct Colors"
+
+            col_wnd.show_window(
+                {
+                    "url": url + urlSuffix,
+                    "title": title,
+                    "width": 1280,
+                    "height": 800,
+                    "style": {},
+                }
+            )
 
 
 def BwApiPluginInit() -> int:
-    BwApi.IdentifierSet('BeProduct Sync')
+    BwApi.IdentifierSet("BeProduct Sync")
     if config.SYNC_CLIENT_RUNNING:
-        BwApi.MenuFunctionAdd('Material Library', wnd_callback, 0)
-        BwApi.MenuFunctionAdd('Color Library', wnd_callback, 1)
+        BwApi.MenuFunctionAdd("Material Library", wnd_callback, 0)
+        BwApi.MenuFunctionAdd("Color Library", wnd_callback, 1)
         # BwApi.MenuFunctionAdd('Sync Color Libraries', sync_callback, 1)
-        BwApi.MenuFunctionAdd('Sync From Local Folder', sync_callback, 0)
-        BwApi.MenuFunctionAdd('Sync To Cloud', sync_callback, 3)
-        BwApi.MenuFunctionAdd('Settings', sync_callback, 5)
+        BwApi.MenuFunctionAdd("Sync From Local Folder", sync_callback, 0)
+        BwApi.MenuFunctionAdd("Sync To Cloud", sync_callback, 3)
+        BwApi.MenuFunctionAdd("Settings", sync_callback, 5)
         BwApi.MenuFunctionReloadAdd()
         # register to file -> open event
         BwApi.EventRegister(fileopenthandler, 1, BwApi.BW_API_EVENT_GARMENT_OPEN)
         BwApi.EventRegister(filemodifiedhandler, 1, BwApi.BW_API_EVENT_GARMENT_MODIFIED)
     return bw.init()
+
 
 # invoke debug if enabled
 debug()

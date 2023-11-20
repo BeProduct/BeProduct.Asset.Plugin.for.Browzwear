@@ -40,7 +40,6 @@ except Exception as exc:
     ERROR = exc
 
 if SYNC_CLIENT_RUNNING:
-
     response = urllib.request.urlopen(
         "http://127.0.0.1:55862/api/settings/getsettings/"
     )
