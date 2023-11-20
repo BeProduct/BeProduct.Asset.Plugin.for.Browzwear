@@ -72,7 +72,7 @@ def get_bw_file_info() -> str:
     i = ind - 1
     filename = "%2F".join(map(quote, path_components[: i if i != 0 else None]))
 
-    infoFromBw = None
+    infoFromBw = ""
     json_str = BwApi.GarmentInfoGetEx(BwApi.GarmentId(), "beproduct_version")
     if json_str:
         version = json.loads(json.loads(json_str)["value"])
@@ -86,7 +86,8 @@ def get_bw_file_info() -> str:
     )
 
     response = urlopen(url, context=context)
-    return json.loads(response.read().decode("utf-8"))
+    inf = json.loads(response.read().decode("utf-8"))
+    return inf
 
 
 class BeProductWnd(IBwApiWndEvents):
