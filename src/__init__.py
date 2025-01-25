@@ -59,7 +59,8 @@ def debug():
 
 class WndCallback(BwApi.CallbackBase):
     def Run(self, garment_id, callback_id, data):
-        url = "https://prod-beproduct-vstitcher-plugin.azurewebsites.net/index.html"
+        # url = "https://prod-beproduct-vstitcher-plugin.azurewebsites.net/index.html"
+        url = "https://dev-plugin.azurewebsites.net/index.html"
         # url = "http://localhost:44304/index.html"
         # rl = "https://8da810229a9e.ngrok.app/index.html"
 
